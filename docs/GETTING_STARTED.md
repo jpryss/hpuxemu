@@ -23,6 +23,16 @@ On Ubuntu 24.04 (Debian and the others: the same packages under their names):
     $ (cd rust/hpuxemu && cargo build --release)       # about a minute: the emulator
     $ alias hpuxemu=$PWD/rust/hpuxemu/target/release/hpuxemu
 
+One setting of the Linux machine matters: **process ids**. HP-UX's end at 30000, the
+emulated processes have the host's, and some HP-UX programs (`csh` for one) hang when
+they get a larger one. Most Linux systems hand out ids up to 32768 or 4194304, so:
+
+    $ sudo sysctl -w kernel.pid_max=30000                                  # until the next boot
+    $ echo kernel.pid_max=30000 | sudo tee /etc/sysctl.d/90-hpuxemu.conf   # for good
+
+The emulator prints a warning at every start while the limit is higher. (On WSL2 the
+first line goes into `/etc/wsl.conf` as a boot command, or is run after each start.)
+
 Nothing else is needed: the emulator is one Rust program, `hpuxemu` (the alias is for the
 commands below; a link in a directory of your PATH does as well). Python runs the tools
 around it - `build.py`, which makes the root, and the tests - and the tools find the

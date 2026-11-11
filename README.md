@@ -18,6 +18,7 @@ an HP-UX shell.
     git clone --recursive https://github.com/jpryss/hpuxemu && cd hpuxemu
     (cd rust/hpuxemu && cargo build --release)       # the emulator; needs Rust
     alias hpuxemu=$PWD/rust/hpuxemu/target/release/hpuxemu
+    sudo sysctl -w kernel.pid_max=30000              # HP-UX's process ids end there
     python3 build.py --patches --scripts core.iso    # your HP-UX CD image -> ../hpuxroot
     hpuxemu /usr/bin/sh -i                           # an HP-UX shell
 
@@ -83,6 +84,11 @@ hosts an interpreter runs at about 100 million instructions per second.
     sudo apt install git python3 python3-pil cargo   # or your system's equivalents
     git clone --recursive https://github.com/jpryss/hpuxemu && cd hpuxemu
     (cd rust/hpuxemu && cargo build --release)       # -> rust/hpuxemu/target/release/hpuxemu
+
+HP-UX process ids end at 30000 and the emulated processes have the host's: set
+`kernel.pid_max=30000` (`sudo sysctl -w`, or a file in `/etc/sysctl.d` to keep it), or
+some programs - `csh` among them - hang when they get a larger id. The emulator warns
+at every start while the limit is higher.
 
 The CPU is a crate of its own, [hppa32-jit](https://github.com/jpryss/hppa32-jit), a
 submodule at `rust/hppa32-jit` (`git submodule update --init` if the clone was not
