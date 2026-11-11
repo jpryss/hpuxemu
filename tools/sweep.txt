@@ -1,0 +1,73 @@
+# Commands run by tools/sweep.py under /usr/bin/sh -c. `=> text` is an expected substring.
+uname -a => HP-UX
+id => uid=0
+echo hello => hello
+~ date +%Y | wc -c => 5
+ls / => usr
+ls -l /usr/bin/ls => ls
+ls -la /etc | head -5 => .
+expr 6 \* 7 => 42
+printf '%05d|%s\n' 42 x => 00042|x
+echo abc | tr a-z A-Z => ABC
+echo 'b a c' | tr ' ' '\n' | sort => a
+echo 'x y z' | awk '{print $2, NF}' => y 3
+echo hello world | sed 's/world/there/' => hello there
+echo hello world | cut -d' ' -f2 => world
+grep -c root /etc/passwd => 1
+cal 1 2000 | head -2 => January 2000
+basename /usr/bin/ls => ls
+head -3 /etc/passwd | tail -1 => :
+cmp /etc/passwd /etc/passwd && echo same => same
+wc -l /etc/passwd => passwd
+cat /etc/hosts | wc -l
+hostname
+ksh -c 'echo $((3+4))' => 7
+csh -c 'echo $shell' => csh
+csh -c 'which ls' => /usr/bin/ls
+find /etc/opt -type d | head -3
+df / => /dev/root
+bdf / => /dev/root
+~ ps -ef | head -3 => PID
+~ ps -ef -l | head -3 => PID
+printf 'main(){printf("hi\\n");}\n' > /tmp/t.c && cc -o /tmp/t /tmp/t.c && /tmp/t => hi
+printf 'main(){int i;double x=0;for(i=1;i<1000;i++)x+=1.0/i;printf("%%.4f\\n",x);}\n' > /tmp/t2.c && cc -o /tmp/t2 /tmp/t2.c && /tmp/t2 => 7.4845
+vi -V 2>&1 | head -1
+sh -c 'kill -0 $$ && echo alive' => alive
+sh -c 'trap "echo caught" TERM; kill -TERM $$; echo after' => caught
+sh -c 'sleep 1 & wait; echo waited' => waited
+sh -c '(exit 3); echo $?' => 3
+sh -c 'cat < /etc/passwd | head -1 > /tmp/p1; cat /tmp/p1' => root
+sh -c 'echo $(ls /usr | wc -l)'
+sh -c 'for i in 1 2 3; do echo $i; done' => 3
+make -f /dev/null -n 2>&1 | head -1
+printf '1p\nq\n' | ed -s /etc/passwd => root
+nroff -man /usr/share/man/man1/ls.1 2>&1 | head -3
+man ls 2>&1 | head -5
+strings /usr/bin/ls | head -2
+nm /usr/bin/ls 2>&1 | head -2
+size /usr/bin/ls => +
+what /usr/bin/ls | head -2
+od -c /etc/passwd | head -1 => r   o   o   t
+tar cf /tmp/t.tar /etc/passwd && tar tf /tmp/t.tar => etc/passwd
+compress -c /etc/passwd | uncompress -c | head -1 => root
+lp -h 2>&1 | head -1
+echo '2^100' | bc => 1267650600228229401496703205376
+echo '2 100 ^ p' | dc => 1267650600228229401496703205376
+# server and client print in whichever order they run; ping's times vary; the Python
+# CPU keeps a private copy of a shared memory segment (DESIGN.md), so the IPC test's
+# parent sees the child's write on the Rust CPU only: not compared between the CPUs
+~cc -o /tmp/sock /tmp/sock.c && /tmp/sock => unix ping
+~/usr/sbin/ping localhost -n 2 => 0% packet loss
+~cc -o /tmp/ipc /tmp/ipc.c && /tmp/ipc => written by the child
+# tar seeks a directory back to its cookie after every file
+rm -rf /tmp/tt && mkdir -p /tmp/tt && echo a > /tmp/tt/a && echo b > /tmp/tt/b && echo c > /tmp/tt/c && tar cf /tmp/tt.tar /tmp/tt && tar tf /tmp/tt.tar | wc -l => 4
+cd /usr/lib/X11/app-defaults && a=$(find . -print | wc -l) && b=$(find . -print | cpio -o 2>/dev/null | cpio -it 2>/dev/null | wc -l) && [ $a -eq $b ] && echo cpio lists all $a => cpio lists all
+cc -o /tmp/signals /tmp/signals.c && /tmp/signals | tr '\n' ' ' => pipes 42925 exits 1275 stopped 1 termsig 15 usr1 100 alarm 1 read -1 eintr 1 blocked 100 unblocked 101 chld>=51 1
+# the permission model: search permission on each directory of a path; HFS ACLs
+rm -rf /tmp/pd && mkdir /tmp/pd && echo s > /tmp/pd/f && chmod 644 /tmp/pd/f && chmod 700 /tmp/pd && su lp -c 'cat /tmp/pd/f' 2>&1 => Permission denied
+rm -f /tmp/pe && echo hi > /tmp/pe && chmod 600 /tmp/pe && chacl 'lp.%=r' /tmp/pe && su lp -c 'cat /tmp/pe' => hi
+rm -f /tmp/pe && echo hi > /tmp/pe && chmod 644 /tmp/pe && chacl 'lp.%=' /tmp/pe && su lp -c 'cat /tmp/pe' 2>&1; ls -l /tmp/pe | cut -c1-11; chmod 644 /tmp/pe; ls -l /tmp/pe | cut -c1-11 => Permission denied
+cc -o /tmp/netman /tmp/netman.c && /tmp/netman => ifs 2 lo0  1 lan0 0 ADDRS 2 loop 127.0.0.1 entry 2 ttl 1 set refused
+# the process layout: _CPU_REVISION from the info block, library text in Q4, code in the heap runs
+cc -o /tmp/hplayout /tmp/hplayout.c 2>/dev/null && /tmp/hplayout | tr '\n' ' ' => cpu revision ok library text in Q4 program text in Q1 heap code returns 42
+cc -o /tmp/flt /tmp/flt.c 2>/dev/null && /tmp/flt 2>/dev/null | tr '\n' ' ' => unmapped: 50 faults, last signal 11 readable: 1 PROT_NONE: signal 11 next page still readable: 9 PROT_READ again: 7 write to read-only: signal 11 stack: 3 kill: signal 11 child: status 0xb ignored child: status 0x8b00

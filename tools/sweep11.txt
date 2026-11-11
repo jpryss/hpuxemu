@@ -1,0 +1,9 @@
+# HP-UX 11.00 only (python3 tools/sweep.py -r ../hpuxroot11 tools/sweep11.txt): what
+# 10.20 does not have. tools/sweep.txt runs on both releases.
+# MIB-2 through libnm: /dev/ip's T_OPTMGMT_REQ tables, the LAN interface from DLPI
+cc -o /tmp/mibget /tmp/mibget.c -lnm 2>/dev/null && /tmp/mibget => ifs 2 lan0 lo0  loop 127.0.0.1 rto 1 udp 1 icmp 1
+# POSIX threads: kernel threads (_lwp_create, ksleep/kwakeup) scheduled by the emulator
+cc -o /tmp/threads /tmp/threads.c -lpthread 2>/dev/null && /tmp/threads => count 4000 pc 200 20100 timedwait ETIMEDOUT spin 1 read hello 1 select 0 child 3
+cc -o /tmp/threadsig /tmp/threadsig.c -lpthread 2>/dev/null && /tmp/threadsig => sigwait got 15 usr1 handled 1
+cc -o /tmp/rtsig /tmp/rtsig.c 2>/dev/null && /tmp/rtsig => rt 38 got 38 val 42
+cc -o /tmp/threadkill /tmp/threadkill.c -lpthread 2>/dev/null && /tmp/threadkill => busy 1 cond 1 read 1 wait 17

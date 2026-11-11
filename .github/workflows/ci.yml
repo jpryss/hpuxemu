@@ -1,0 +1,33 @@
+# What can be checked without an HP-UX root (a root is built from the user's own media
+# and is never in a repository): the Rust CPU and emulator build, the two CPUs agree on random
+# instruction sequences, the decoder matches the GNU assembler's test suite, the Python
+# modules import and the generated documentation is current.
+name: ci
+on: [push, pull_request]
+jobs:
+  build-and-fuzz:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build the Rust CPU
+        run: cd rust/hppa32-jit && cargo build --release --features capi,hpux && cargo build --release --example bench && cargo test --release
+      - name: Build the emulator
+        run: cd rust/hpuxemu && cargo build --release
+      - name: consts.rs is current
+        run: cp rust/hpuxemu/src/consts.rs /tmp/consts.rs && python3 tools/genrust.py && diff /tmp/consts.rs rust/hpuxemu/src/consts.rs
+      - name: Interpreter loop benchmark
+        run: rust/hppa32-jit/target/release/examples/bench 3000000
+      - name: Python modules import
+        run: python3 -c "import hpuxemu.emu, hpuxemu.cpu, hpuxemu.decode, hpuxemu.disasm, hpuxemu.som, hpuxemu.depot, hpuxemu.iso9660, hpuxemu.rustcpu"
+      - name: Fuzz the Rust CPU against the Python reference
+        run: python3 tools/fuzz.py -n 20000 -j 4 -s 1
+      - name: Decoder against the gas test suite
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/bminor/binutils-gdb ../binutils
+          (cd ../binutils && git sparse-checkout set gas/testsuite/gas/hppa/basic)
+          python3 tools/test_decode.py ../binutils/gas/testsuite/gas/hppa/basic
+      - name: SYSCALLS.md is current
+        run: python3 tools/syscalls_doc.py | diff - docs/SYSCALLS.md

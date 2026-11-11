@@ -1,0 +1,15 @@
+# HP-UX roots and media never belong in the repository (they are HP's software)
+hpuxroot*/
+*.iso
+*.depot
+*.7z
+__pycache__/
+*.pyc
+/out/
+rust/target/
+rust/*/target/
+*.tar
+*.tar.gz
+*.cpio
+*.bundle
+xstub.png

@@ -1,0 +1,49 @@
+# The filesets build.py takes from the HP-UX 10.20 core CD (B3782-10101, "HP-UX 10.20
+# CORE 9000/700"), as PRODUCT/FILESET patterns (fnmatch). Lines starting with "-" exclude;
+# exclusions win. "required" filesets make a working root; without all of them build.py
+# refuses (--force builds anyway).
+#
+# The localized message, help and manual filesets (-JPN-, -GER-, ...), the install and
+# diskless servers and the X server's hardware drivers are left out. X11, CDE and VUE are
+# taken: the libraries are what programs link against (X itself is a later milestone).
+
+required OS-Core/UX-CORE          commands and the shells
+required OS-Core/CMDS-MIN
+required OS-Core/CMDS-AUX
+required OS-Core/CORE-SHLIBS      libc.1, dld.sl and the other shared libraries
+required OS-Core/C-MIN            libc.a, crt0.o, as, strip
+required OS-Core/C-KRN            cc (the bundled compiler)
+required ProgSupport/C-INC        /usr/include
+required ProgSupport/PROG-MIN     ld, make, libraries
+
+# everything else on the CD, minus the exclusions below
+*/*
+
+-*-JPN-*
+-*-DAN-*
+-*-DUT-*
+-*-FIN-*
+-*-FRE-*
+-*-GER-*
+-*-ITA-*
+-*-KOR-*
+-*-NOR-*
+-*-SCH-*
+-*-SPA-*
+-*-SWE-*
+-*-TCH-*
+-*/VRUN-*-HELP
+-*/VRUN-*-HLP
+-HPUX???RT700/*
+-HPUX???CR700/*
+-HPUX-Install/*
+-Diskless/*
+-InstantIgnite/*
+-NetInstall/*
+-Xserver/DDX-*
+-KernDevKit*/*
+-Upgrade/*
+-2UserDegrade/*
+-UserLicense/*
+# patches are applied by --patches (by ancestor), not installed as filesets
+-PH??_*/*

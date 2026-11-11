@@ -1,0 +1,3 @@
+[submodule "rust/hppa32-jit"]
+	path = rust/hppa32-jit
+	url = https://github.com/jpryss/hppa32-jit.git

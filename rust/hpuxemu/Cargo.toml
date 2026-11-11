@@ -1,0 +1,19 @@
+[package]
+name = "hpuxemu"
+version = "0.1.0"
+edition = "2021"
+description = "User-mode emulator for 32-bit HP-UX 10.20/11.00 PA-RISC programs (Rust implementation)"
+license = "MIT"
+
+[[bin]]
+name = "hpuxemu"
+path = "src/main.rs"
+
+[dependencies]
+# the CPU: rust/hppa32-jit (interpreter and x86-64 JIT), with its HP-UX native routines
+hppa32-jit = { path = "../hppa32-jit", features = ["hpux"] }
+libc = "0.2"
+
+[profile.release]
+opt-level = 3
+debug = 1
