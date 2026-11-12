@@ -25,9 +25,21 @@ jobs:
       - name: Fuzz the Rust CPU against the Python reference
         run: python3 tools/fuzz.py -n 20000 -j 4 -s 1
       - name: Decoder against the gas test suite
+        # the test files come from a binutils release; when they cannot be fetched the
+        # step is skipped with a warning, since that says nothing about the decoder
         run: |
-          git clone --depth 1 --filter=blob:none --sparse https://github.com/bminor/binutils-gdb ../binutils
-          (cd ../binutils && git sparse-checkout set gas/testsuite/gas/hppa/basic)
-          python3 tools/test_decode.py ../binutils/gas/testsuite/gas/hppa/basic
+          V=binutils-2.43
+          T=$RUNNER_TEMP/gas
+          mkdir -p $T
+          for url in https://ftp.gnu.org/gnu/binutils/$V.tar.xz https://sourceware.org/pub/binutils/releases/$V.tar.xz; do
+            if curl -fsSL --retry 2 -m 300 "$url" | tar -xJ -C $T --strip-components=6 "$V/gas/testsuite/gas/hppa/basic"; then
+              break
+            fi
+          done
+          if [ ! -f $T/basic.exp ]; then
+            echo "::warning::the gas test suite could not be downloaded; decoder test skipped"
+            exit 0
+          fi
+          python3 tools/test_decode.py $T
       - name: SYSCALLS.md is current
         run: python3 tools/syscalls_doc.py | diff - docs/SYSCALLS.md
